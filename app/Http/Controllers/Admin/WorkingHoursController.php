@@ -55,10 +55,20 @@ class WorkingHoursController extends Controller
         if (! Gate::allows('working_hour_create')) {
             return abort(401);
         }
-        $working_hour = WorkingHour::create($request->all());
-
-
-
+        $stime = $request->input('start_time');
+        $etime = $request->input('finish_time');
+        $checkStartTime = WorkingHour::where('start_time',$stime)->first();
+        $checkEndTime = WorkingHour::where('finish_time', $etime)->first();
+        $doubleCheck = WorkingHour::where('start_time','<',$stime)->where('finish_time','>',$stime)->get();
+        $newStartTime = [];
+        foreach($doubleCheck as $dc){
+            $newStartTime = $dc;
+        }
+        // return $checkEndTime;
+        // return dd($newStartTime);
+        if($checkStartTime === null && $checkEndTime === null && count($newStartTime) === 0) {
+            $working_hour = WorkingHour::create($request->all());
+        }
         return redirect()->route('admin.working_hours.index');
     }
 
